@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotizador Mola</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="card">
+
+        <div class="header">
+            <img src="LogoMola.png" class="logo">
+            <h1>Cotizador de Afiches</h1>
+            <button class="config-btn" onclick="toggleConfig()">⚙</button>
+        </div>
+
+        <div class="form">
+
+            <div class="field">
+                <label>Cantidad</label>
+                <input type="number" id="cantidad" value="100">
+            </div>
+
+            <div class="field">
+                <label>Papel</label>
+                <select id="papel"></select>
+            </div>
+
+            <div class="field">
+                <label>Tamaño</label>
+                <select id="tamano"></select>
+            </div>
+
+            <div class="field">
+                <label>Tintas</label>
+                <div class="tintas">
+                    <button onclick="seleccionarTinta(1,this)">1x0</button>
+                    <button onclick="seleccionarTinta(2,this)">2x0</button>
+                    <button onclick="seleccionarTinta(4,this)">4x0</button>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="cotizar()">Calcular</button>
+            <button class="btn-secondary" onclick="resetCotizador()">Nueva cotización</button>
+
+        </div>
+
+    </div>
+
+    <div id="resultado" class="card resultado hidden"></div>
+
+</div>
+
+<div id="configPanel" class="config-panel">
+
+    <div class="config-card">
+
+        <button class="close-btn" onclick="toggleConfig()">✕</button>
+
+        <h2 class="config-title">Configuración</h2>
+
+        <div class="grid">
+
+            <div class="field">
+                <label>Margen</label>
+                <input id="margen">
+            </div>
+
+            <div class="field">
+                <label>Logística</label>
+                <input id="arranque">
+            </div>
+
+            <div class="field">
+                <label>Corte</label>
+                <input id="corte">
+            </div>
+
+            <div class="field">
+                <label>Adicionales</label>
+                <input id="adicionales">
+            </div>
+
+            <div class="field full">
+                <label>Sobrante</label>
+                <input id="sobrante">
+            </div>
+
+        </div>
+
+        <h3 class="sub-title">Papeles</h3>
+
+        <select id="papelSelector" onchange="cargarPapelConfig()"></select>
+
+        <div id="editorPapel"></div>
+
+        <button class="btn-primary" onclick="guardarConfig()">Guardar</button>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
