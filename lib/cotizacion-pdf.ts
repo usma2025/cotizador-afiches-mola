@@ -179,7 +179,7 @@ export async function generateClientQuotePdf(data: ClientQuotePdfData) {
   pdf.setFontSize(9);
   pdf.text("Documento generado desde Cotizador Mola.", margin, 247);
   pdf.text(
-    "Vigencia de 90 días tras emitida la presente. Los precios expuestos no incluyen diseño...",
+    "Vigencia de 90 días tras emitida la presente. Los precios expuestos no incluyen diseño. Si no requieres fáctura eléctronica, puede hacer el pago sin IVA.",
     margin,
     255,
     { maxWidth: pageWidth - (margin * 2) }
