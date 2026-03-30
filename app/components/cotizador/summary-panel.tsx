@@ -1,15 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { CotizacionBreakdown, formatCop } from "@/lib/cotizador";
+import { ClientQuotePdfData, generateClientQuotePdf } from "@/lib/cotizacion-pdf";
 
 type SummaryPanelProps = {
   breakdown: CotizacionBreakdown | null;
   loading: boolean;
   validationError: string | null;
+  resumen: string;
+  pdfData: ClientQuotePdfData | null;
 };
 
-function Item({ label, value }: { label: string; value: string }) {
+function PriceItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-brand border border-[#18425b] bg-[#0b3045] px-3 py-2">
       <span className="text-sm text-white/70">{label}</span>
@@ -18,13 +22,34 @@ function Item({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function SummaryPanel({ breakdown, loading, validationError }: SummaryPanelProps) {
+export function SummaryPanel({
+  breakdown,
+  loading,
+  validationError,
+  resumen,
+  pdfData,
+}: SummaryPanelProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  async function handleGeneratePdf() {
+    if (!pdfData) {
+      return;
+    }
+
+    setIsGeneratingPdf(true);
+    try {
+      await generateClientQuotePdf(pdfData);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  }
+
   return (
     <aside className="lg:sticky lg:top-6">
       <div className="rounded-[18px] border border-[#11354a] bg-brand-blue p-5 shadow-brand sm:p-6">
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-orange">Paso 2</p>
-          <h3 className="text-lg font-semibold text-white">Resumen en tiempo real</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-orange">Paso 2 - Resumen de cotización</p>
+          <h3 className="text-lg font-semibold text-white">Resumen listo para compartir</h3>
         </div>
 
         {validationError ? (
@@ -45,19 +70,46 @@ export function SummaryPanel({ breakdown, loading, validationError }: SummaryPan
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="mt-3 space-y-2"
+            className="mt-3 space-y-3"
           >
-            <Item label="Producción" value={formatCop(breakdown.totalProduccionUnidades)} />
-            <Item label="Pliegos" value={formatCop(breakdown.pliegos)} />
-            <Item label="Papel" value={`$${formatCop(breakdown.costoPapel)}`} />
-            <Item label="Planchas" value={`$${formatCop(breakdown.costoPlanchas)}`} />
-            <Item label="Tintas" value={`$${formatCop(breakdown.costoTintas)}`} />
-            <Item label="Costo producción" value={`$${formatCop(breakdown.costoProduccion)}`} />
+            <div className="flex justify-end">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={isGeneratingPdf || !pdfData}
+                onClick={() => void handleGeneratePdf()}
+                className="rounded-brand bg-white px-4 py-2 text-sm font-semibold text-brand-blue transition hover:bg-[#fff4eb] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGeneratingPdf ? "Generando PDF..." : "Descargar PDF cliente"}
+              </motion.button>
+            </div>
+
+            <div className="rounded-brand border border-[#18425b] bg-[#0b3045] px-4 py-4">
+              <p className="text-xs uppercase tracking-[0.14em] text-brand-orange">Resumen</p>
+              <p className="mt-2 text-sm leading-6 text-white/90">{resumen}</p>
+            </div>
 
             <div className="mt-4 rounded-brand bg-brand-orange px-4 py-4 text-white shadow-lg">
-              <p className="text-xs uppercase tracking-wide text-white/80">Precio total</p>
-              <p className="mt-1 text-2xl font-bold">${formatCop(breakdown.precioFinal)}</p>
-              <p className="text-sm text-white/85">${formatCop(breakdown.precioUnidad)} por unidad</p>
+              <p className="text-xs uppercase tracking-wide text-white/80">Sin IVA</p>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-white/80">Precio unitario</span>
+                  <span className="text-lg font-semibold">${formatCop(breakdown.precioUnidad)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-4 border-t border-white/20 pt-2">
+                  <span className="text-sm text-white/80">Precio total</span>
+                  <span className="text-2xl font-bold">${formatCop(breakdown.precioFinal)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-brand border border-[#18425b] bg-[#0b3045] px-4 py-3 shadow-sm">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-white/55">Con IVA</p>
+              <div className="mt-3 space-y-2">
+                <PriceItem label="Precio unitario con IVA" value={`$${formatCop(breakdown.precioUnidadConIva)}`} />
+                <PriceItem label="Precio total con IVA" value={`$${formatCop(breakdown.precioFinalConIva)}`} />
+              </div>
             </div>
           </motion.div>
         ) : (

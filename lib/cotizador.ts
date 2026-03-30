@@ -42,9 +42,19 @@ export type CotizacionBreakdown = {
   costoProduccion: number;
   precioFinal: number;
   precioUnidad: number;
+  precioFinalConIva: number;
+  precioUnidadConIva: number;
 };
 
 export const TINTA_OPTIONS = [1, 2, 4] as const;
+
+export const IVA_RATE = 0.19;
+
+export const TINTA_LABELS: Record<number, string> = {
+  1: "1x0 (Monocolor)",
+  2: "2x0 (Bicolor)",
+  4: "4x0 (Full color)",
+};
 
 export const DEFAULT_SISTEMA: Sistema = {
   papeles: {},
@@ -159,6 +169,8 @@ export function cotizar(sistema: Sistema, input: CotizacionInput): CotizacionBre
 
   const precioFinal = costoProduccion * (1 + sistema.margen_ganancia);
   const precioUnidad = precioFinal / input.cantidad;
+  const precioFinalConIva = precioFinal * (1 + IVA_RATE);
+  const precioUnidadConIva = precioUnidad * (1 + IVA_RATE);
 
   return {
     totalProduccionUnidades,
@@ -170,6 +182,8 @@ export function cotizar(sistema: Sistema, input: CotizacionInput): CotizacionBre
     costoProduccion,
     precioFinal,
     precioUnidad,
+    precioFinalConIva,
+    precioUnidadConIva,
   };
 }
 

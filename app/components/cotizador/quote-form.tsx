@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { TINTA_LABELS } from "@/lib/cotizador";
 
 type QuoteFormProps = {
   cantidad: number;
@@ -14,12 +15,6 @@ type QuoteFormProps = {
   papelOptions: string[];
   formatoOptions: Array<{ key: string; label: string }>;
   onReset: () => void;
-};
-
-const tintaLabels: Record<number, string> = {
-  1: "1x0",
-  2: "2x0",
-  4: "4x0",
 };
 
 export function QuoteForm({
@@ -39,8 +34,8 @@ export function QuoteForm({
     <div className="rounded-[18px] border border-[#d9e3ea] bg-white p-5 shadow-surface sm:p-6">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-orange">Paso 1</p>
-          <h2 className="text-lg font-semibold text-brand-blue sm:text-xl">Configura tu cotización</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-orange">Paso 1 - Cotizacion Mola</p>
+          <h2 className="text-lg font-semibold text-brand-blue sm:text-xl">Arma una cotización clara y lista para compartir</h2>
         </div>
         <motion.button
           type="button"
@@ -122,13 +117,13 @@ export function QuoteForm({
                   whileTap={{ scale: 0.97 }}
                   onClick={() => onTintaChange(value)}
                   className={[
-                    "h-11 rounded-brand border text-sm font-semibold transition",
+                    "min-h-14 rounded-brand border px-2 py-2 text-center text-xs font-semibold leading-snug transition sm:text-sm",
                     selected
                       ? "border-brand-orange bg-brand-orange text-white"
                       : "border-[#c9d7e1] bg-white text-brand-blue hover:border-brand-orange hover:bg-[#fff7ef]",
                   ].join(" ")}
                 >
-                  {tintaLabels[value]}
+                  {TINTA_LABELS[value]}
                 </motion.button>
               );
             })}

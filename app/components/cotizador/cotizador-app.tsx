@@ -11,11 +11,14 @@ import {
   fetchSistema,
   Sistema,
   SistemaConfig,
+  TINTA_LABELS,
   validateCotizacionInput,
 } from "@/lib/cotizador";
+import { ClientQuotePdfData } from "@/lib/cotizacion-pdf";
 import { QuoteForm } from "./quote-form";
 import { SummaryPanel } from "./summary-panel";
 import { ConfigModal } from "./config-modal";
+import { InternalDetailsPanel } from "./internal-details-panel";
 
 function firstKey(record: Record<string, unknown>) {
   return Object.keys(record)[0] ?? "";
@@ -142,6 +145,32 @@ export default function CotizadorApp() {
     label: value.label,
   }));
 
+  const resumenCotizacion = useMemo(() => {
+    const formatoLabel = sistema.formatos[formatoKey]?.label ?? "medida seleccionada";
+    const tintaLabel = TINTA_LABELS[tintaSeleccionada] ?? "tintas seleccionadas";
+    const papelLabel = papelKey || "papel seleccionado";
+
+    return `Afiches a ${formatoLabel}, ${tintaLabel}, en papel ${papelLabel}.`;
+  }, [formatoKey, papelKey, sistema.formatos, tintaSeleccionada]);
+
+  const pdfData = useMemo<ClientQuotePdfData | null>(() => {
+    if (!breakdown) {
+      return null;
+    }
+
+    return {
+      cantidad,
+      formato: sistema.formatos[formatoKey]?.label ?? "Formato seleccionado",
+      tintas: TINTA_LABELS[tintaSeleccionada] ?? "Tintas seleccionadas",
+      papel: papelKey || "Papel seleccionado",
+      resumen: resumenCotizacion,
+      precioUnitario: breakdown.precioUnidad,
+      precioTotal: breakdown.precioFinal,
+      precioUnitarioConIva: breakdown.precioUnidadConIva,
+      precioTotalConIva: breakdown.precioFinalConIva,
+    };
+  }, [breakdown, cantidad, formatoKey, papelKey, resumenCotizacion, sistema.formatos, tintaSeleccionada]);
+
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
       <motion.nav
@@ -251,21 +280,31 @@ export default function CotizadorApp() {
           transition={{ duration: 0.28 }}
           className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]"
         >
-          <QuoteForm
-            cantidad={cantidad}
-            onCantidadChange={(value) => setCantidad(clampCantidad(value))}
-            papelKey={papelKey}
-            onPapelChange={setPapelKey}
-            formatoKey={formatoKey}
-            onFormatoChange={setFormatoKey}
-            tintaSeleccionada={tintaSeleccionada}
-            onTintaChange={setTintaSeleccionada}
-            papelOptions={papelOptions}
-            formatoOptions={formatoOptions}
-            onReset={handleReset}
-          />
+          <div className="space-y-5">
+            <QuoteForm
+              cantidad={cantidad}
+              onCantidadChange={(value) => setCantidad(clampCantidad(value))}
+              papelKey={papelKey}
+              onPapelChange={setPapelKey}
+              formatoKey={formatoKey}
+              onFormatoChange={setFormatoKey}
+              tintaSeleccionada={tintaSeleccionada}
+              onTintaChange={setTintaSeleccionada}
+              papelOptions={papelOptions}
+              formatoOptions={formatoOptions}
+              onReset={handleReset}
+            />
 
-          <SummaryPanel breakdown={breakdown} loading={isLoading} validationError={validationError} />
+            <InternalDetailsPanel breakdown={breakdown} loading={isLoading} />
+          </div>
+
+          <SummaryPanel
+            breakdown={breakdown}
+            loading={isLoading}
+            validationError={validationError}
+            resumen={resumenCotizacion}
+            pdfData={pdfData}
+          />
         </motion.div>
       )}
 
