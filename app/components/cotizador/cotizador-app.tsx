@@ -158,12 +158,16 @@ export default function CotizadorApp() {
       return null;
     }
 
+    const medida = sistema.formatos[formatoKey]?.label ?? "Formato seleccionado";
+
     return {
       cantidad,
-      formato: sistema.formatos[formatoKey]?.label ?? "Formato seleccionado",
+      medida,
+      formato: medida,
       tintas: TINTA_LABELS[tintaSeleccionada] ?? "Tintas seleccionadas",
       papel: papelKey || "Papel seleccionado",
       resumen: resumenCotizacion,
+      totalAfichesAPliego: `${cantidad} afiches a pliego`,
       precioUnitario: breakdown.precioUnidad,
       precioTotal: breakdown.precioFinal,
       precioUnitarioConIva: breakdown.precioUnidadConIva,
@@ -295,7 +299,9 @@ export default function CotizadorApp() {
               onReset={handleReset}
             />
 
-            <InternalDetailsPanel breakdown={breakdown} loading={isLoading} />
+            <div className="hidden lg:block">
+              <InternalDetailsPanel breakdown={breakdown} loading={isLoading} />
+            </div>
           </div>
 
           <SummaryPanel
@@ -305,6 +311,10 @@ export default function CotizadorApp() {
             resumen={resumenCotizacion}
             pdfData={pdfData}
           />
+
+          <div className="mt-16 lg:hidden">
+            <InternalDetailsPanel breakdown={breakdown} loading={isLoading} />
+          </div>
         </motion.div>
       )}
 

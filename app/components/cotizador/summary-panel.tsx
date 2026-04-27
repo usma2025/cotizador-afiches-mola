@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { CotizacionBreakdown, formatCop } from "@/lib/cotizador";
 import { ClientQuotePdfData, generateClientQuotePdf } from "@/lib/cotizacion-pdf";
+import { generateClientQuoteJpg } from "@/lib/cotizacion-jpg";
 
 type SummaryPanelProps = {
   breakdown: CotizacionBreakdown | null;
@@ -30,6 +31,7 @@ export function SummaryPanel({
   pdfData,
 }: SummaryPanelProps) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isGeneratingJpg, setIsGeneratingJpg] = useState(false);
 
   async function handleGeneratePdf() {
     if (!pdfData) {
@@ -41,6 +43,19 @@ export function SummaryPanel({
       await generateClientQuotePdf(pdfData);
     } finally {
       setIsGeneratingPdf(false);
+    }
+  }
+
+  async function handleGenerateJpg() {
+    if (!pdfData) {
+      return;
+    }
+
+    setIsGeneratingJpg(true);
+    try {
+      await generateClientQuoteJpg(pdfData);
+    } finally {
+      setIsGeneratingJpg(false);
     }
   }
 
@@ -72,7 +87,7 @@ export function SummaryPanel({
             transition={{ duration: 0.2 }}
             className="mt-3 space-y-3"
           >
-            <div className="flex justify-end">
+            <div className="grid gap-2 sm:grid-cols-2">
               <motion.button
                 type="button"
                 whileHover={{ scale: 1.02 }}
@@ -83,11 +98,29 @@ export function SummaryPanel({
               >
                 {isGeneratingPdf ? "Generando PDF..." : "Descargar PDF cliente"}
               </motion.button>
+
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={isGeneratingJpg || !pdfData}
+                onClick={() => void handleGenerateJpg()}
+                className="rounded-brand border border-white/30 bg-transparent px-4 py-2 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGeneratingJpg ? "Generando JPG..." : "Descargar JPG cliente"}
+              </motion.button>
             </div>
 
             <div className="rounded-brand border border-[#18425b] bg-[#0b3045] px-4 py-4">
               <p className="text-xs uppercase tracking-[0.14em] text-brand-orange">Resumen</p>
-              <p className="mt-2 text-sm leading-6 text-white/90">{resumen}</p>
+              <p className="mt-2 text-sm font-semibold text-white">{pdfData?.totalAfichesAPliego ?? "Resumen de afiches"}</p>
+              <ul className="mt-3 space-y-1 text-sm leading-6 text-white/90">
+                <li>Tipo de papel: {pdfData?.papel ?? "-"}</li>
+                <li>Cantidad: {pdfData?.cantidad ?? "-"}</li>
+                <li>Medida: {pdfData?.medida ?? "-"}</li>
+                <li>Tintas: {pdfData?.tintas ?? "-"}</li>
+              </ul>
+              <p className="mt-3 text-xs text-white/70">{resumen}</p>
             </div>
 
             <div className="mt-4 rounded-brand bg-brand-orange px-4 py-4 text-white shadow-lg">

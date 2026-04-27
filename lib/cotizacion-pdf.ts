@@ -5,10 +5,12 @@ import { formatCop } from "@/lib/cotizador";
 
 export type ClientQuotePdfData = {
   cantidad: number;
+  medida: string;
   formato: string;
   tintas: string;
   papel: string;
   resumen: string;
+  totalAfichesAPliego: string;
   precioUnitario: number;
   precioTotal: number;
   precioUnitarioConIva: number;
@@ -55,29 +57,6 @@ async function loadLogoDataUrl() {
   };
 }
 
-function drawLabelValue(
-  pdf: jsPDF,
-  label: string,
-  value: string,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  pdf.setFillColor(244, 247, 251);
-  pdf.roundedRect(x, y, width, height, 5, 5, "F");
-
-  pdf.setTextColor(86, 107, 122);
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(9);
-  pdf.text(label, x + 5, y + 7);
-
-  pdf.setTextColor(0, 35, 55);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(12);
-  pdf.text(value, x + 5, y + 15);
-}
-
 export async function generateClientQuotePdf(data: ClientQuotePdfData) {
   const pdf = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -122,62 +101,77 @@ export async function generateClientQuotePdf(data: ClientQuotePdfData) {
   pdf.setTextColor(0, 35, 55);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(12);
-  pdf.text("Resumen", margin, 69);
+  pdf.text("Resumen del pedido", margin, 69);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   const resumenLines = pdf.splitTextToSize(data.resumen, contentWidth);
   pdf.text(resumenLines, margin, 76);
 
-  drawLabelValue(pdf, "Cantidad", String(data.cantidad), margin, 92, 40, 20);
-  drawLabelValue(pdf, "Formato", data.formato, margin + 45, 92, 60, 20);
-  drawLabelValue(pdf, "Tintas", data.tintas, margin + 110, 92, 84, 20);
-  drawLabelValue(pdf, "Papel", data.papel, margin, 118, contentWidth, 20);
-
-  pdf.setFillColor(239, 125, 23);
-  pdf.roundedRect(margin, 148, contentWidth, 42, 8, 8, "F");
-  pdf.setTextColor(255, 255, 255);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(11);
-  pdf.text("Valores sin IVA", margin + 6, 158);
-
-  pdf.setFontSize(10);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Precio unitario", margin + 6, 170);
-  pdf.setFont("helvetica", "bold");
-  pdf.text(formatMoney(data.precioUnitario), pageWidth - margin - 6, 170, { align: "right" });
-
-  pdf.setDrawColor(255, 255, 255);
-  pdf.setLineWidth(0.35);
-  pdf.line(margin + 6, 175, pageWidth - margin - 6, 175);
-
-  pdf.setFont("helvetica", "normal");
-  pdf.text("Precio total", margin + 6, 184);
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(18);
-  pdf.text(formatMoney(data.precioTotal), pageWidth - margin - 6, 184, { align: "right" });
-
+  const orderSectionY = 94;
   pdf.setFillColor(244, 247, 251);
-  pdf.roundedRect(margin, 198, contentWidth, 30, 8, 8, "F");
+  pdf.roundedRect(margin, orderSectionY, contentWidth, 48, 8, 8, "F");
+
   pdf.setTextColor(0, 35, 55);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(10);
-  pdf.text("Valores con IVA", margin + 6, 208);
+  pdf.text(data.totalAfichesAPliego, margin + 6, orderSectionY + 10);
 
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
-  pdf.text("Precio unitario con IVA", margin + 6, 217);
-  pdf.text(formatMoney(data.precioUnitarioConIva), pageWidth - margin - 6, 217, { align: "right" });
-  pdf.text("Precio total con IVA", margin + 6, 224);
+  const orderLines = [
+    `Tipo de papel: ${data.papel}`,
+    `Cantidad: ${data.cantidad}`,
+    `Medida: ${data.medida}`,
+    `Tintas: ${data.tintas}`,
+  ];
+  pdf.text(orderLines, margin + 6, orderSectionY + 18);
+
+  pdf.setFillColor(239, 125, 23);
+  pdf.roundedRect(margin, 150, contentWidth, 42, 8, 8, "F");
+  pdf.setTextColor(255, 255, 255);
   pdf.setFont("helvetica", "bold");
-  pdf.text(formatMoney(data.precioTotalConIva), pageWidth - margin - 6, 224, { align: "right" });
+  pdf.setFontSize(11);
+  pdf.text("Valores sin IVA", margin + 6, 160);
+
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Precio unitario", margin + 6, 172);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(formatMoney(data.precioUnitario), pageWidth - margin - 6, 172, { align: "right" });
+
+  pdf.setDrawColor(255, 255, 255);
+  pdf.setLineWidth(0.35);
+  pdf.line(margin + 6, 177, pageWidth - margin - 6, 177);
+
+  pdf.setFont("helvetica", "normal");
+  pdf.text("Precio total", margin + 6, 186);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(18);
+  pdf.text(formatMoney(data.precioTotal), pageWidth - margin - 6, 186, { align: "right" });
+
+  pdf.setFillColor(244, 247, 251);
+  pdf.roundedRect(margin, 201, contentWidth, 30, 8, 8, "F");
+  pdf.setTextColor(0, 35, 55);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(10);
+  pdf.text("Valores con IVA", margin + 6, 211);
+
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(10);
+  pdf.text("Precio unitario con IVA", margin + 6, 220);
+  pdf.text(formatMoney(data.precioUnitarioConIva), pageWidth - margin - 6, 220, { align: "right" });
+  pdf.text("Precio total con IVA", margin + 6, 227);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(formatMoney(data.precioTotalConIva), pageWidth - margin - 6, 227, { align: "right" });
 
   pdf.setDrawColor(226, 233, 239);
-  pdf.line(margin, 240, pageWidth - margin, 240);
+  pdf.line(margin, 242, pageWidth - margin, 242);
   pdf.setTextColor(86, 107, 122);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(9);
-  pdf.text("Documento generado desde Cotizador Mola.", margin, 247);
+  pdf.text("Documento generado desde Cotizador Mola.", margin, 249);
+  pdf.text("Emitido por Mola", pageWidth - margin, 249, { align: "right" });
 
   const fileDate = new Date().toISOString().slice(0, 10);
   pdf.save(`cotizacion-mola-${fileDate}.pdf`);
