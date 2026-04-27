@@ -170,9 +170,13 @@ export async function generateClientQuotePdf(data: ClientQuotePdfData) {
   pdf.setTextColor(86, 107, 122);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(9);
-  pdf.text("Documento generado desde Cotizador Mola.", margin, 249);
-  pdf.text("Emitido por Mola", pageWidth - margin, 249, { align: "right" });
-
+  pdf.text("Documento generado desde Cotizador Mola.", margin, 247);
+  pdf.text(
+    "Vigencia de 90 días tras emitida la presente. Los precios expuestos no incluyen diseño. Si no requieres fáctura eléctronica, puede hacer el pago sin IVA.",
+    margin,
+    255,
+    { maxWidth: pageWidth - (margin * 2) }
+  );
   const fileDate = new Date().toISOString().slice(0, 10);
   pdf.save(`cotizacion-mola-${fileDate}.pdf`);
 }
