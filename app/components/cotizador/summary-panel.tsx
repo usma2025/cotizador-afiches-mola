@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { CotizacionBreakdown, formatCop } from "@/lib/cotizador";
 import { ClientQuotePdfData, generateClientQuotePdf } from "@/lib/cotizacion-pdf";
@@ -61,7 +62,11 @@ export function SummaryPanel({
 
   return (
     <aside className="lg:sticky lg:top-6">
+
       <div className="rounded-[18px] border border-[#11354a] bg-brand-blue p-5 shadow-brand sm:p-6">
+        <div className="mb-5 flex items-center justify-center">
+          <Image src="/LogoMola.png" alt="Logo Mola" width={140} height={56} className="object-contain" />
+        </div>
         <div className="mb-4">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-orange">Paso 2 - Resumen de cotización</p>
           <h3 className="text-lg font-semibold text-white">Resumen listo para compartir</h3>
