@@ -167,7 +167,7 @@ export default function CotizadorApp() {
       tintas: TINTA_LABELS[tintaSeleccionada] ?? "Tintas seleccionadas",
       papel: papelKey || "Papel seleccionado",
       resumen: resumenCotizacion,
-      totalAfichesAPliego: `${cantidad} afiches a pliego`,
+      totalAfichesAPliego: `${cantidad} afiches ${medida}`,
       precioUnitario: breakdown.precioUnidad,
       precioTotal: breakdown.precioFinal,
       precioUnitarioConIva: breakdown.precioUnidadConIva,
